@@ -4,12 +4,10 @@ import './LoginScreen.css';
 
 import LoginContext from '../../contexts/LoginContext';
 
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Form from 'react-bootstrap/Form'
-import InputGroup from 'react-bootstrap/InputGroup'
-import Button from 'react-bootstrap/Button'
-
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 
 export default function LoginScreen(){
 
@@ -46,7 +44,7 @@ export default function LoginScreen(){
             alert(err.response.data)
           }
           else{
-            alert(err);            
+            alert(err);
           }
         }
       })
