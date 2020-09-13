@@ -55,6 +55,7 @@ export default function ChatScreen(props){
     messagesEndRef.current.scrollIntoView({block: "end"});
     //messageTextboxRef.current.focus();
     updateUnreadOnFocusChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendingTo,conversation]);
 
   useEffect(()=>{
