@@ -1,0 +1,13 @@
+.single-message__self{
+  padding: 1px;
+  margin-bottom: 10px;
+  background-color: #DCF8C6;
+  border-radius: 5px;
+}
+.single-message__other{
+  width: 50px;
+  padding: 1px;
+  margin-bottom: 10px;
+  background-color: white;
+  border-radius: 5px;
+}

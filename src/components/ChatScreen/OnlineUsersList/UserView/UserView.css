@@ -1,0 +1,44 @@
+.online-user, .online-user:hover, .online-user-unread, .online-user-selected{
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 10px;
+  cursor: pointer;
+  border-top: 1px solid #F5F5F5;
+}
+
+.online-user:hover{
+  background-color: #F5F5F5;
+}
+
+.online-user-selected{
+  background-color: #EBEBEB;
+}
+
+.online-user__icon{
+  flex-grow: auto;
+  background-image: url('/profile_default.png');
+  height: 50px;
+  width: 50px;
+  background-color: #F5F5F5;
+  padding: 10px;
+  border-radius: 50px;
+}
+
+.online-user__details{
+  flex-grow: 1;
+  padding: 10px;
+}
+
+.online-user__details__unreads{
+  font-size: 15px;
+  height: 25px;
+  width: 25px;
+  margin: auto;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  background-color: #6DD363;
+  float: right;
+  border-radius: 50px;
+}
