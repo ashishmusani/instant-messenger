@@ -12,3 +12,7 @@
   background-color: white;
   border-radius: 5px;
 }
+
+.single-message__content{
+  word-wrap: break-word;
+}
