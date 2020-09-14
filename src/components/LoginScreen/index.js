@@ -53,7 +53,7 @@ export default function LoginScreen(){
 
   return(
       <Form className="login-form" noValidate validated={formIsValidated} onSubmit={handleLogin}>
-        <Form.Group as={Row} className="justify-content-center" controlId="validate_login">
+        <Form.Group as={Row} className="justify-content-center" controlId="validate_login_username">
           <Col sm="2" md="1">
             <Form.Label>Username</Form.Label>
           </Col>
@@ -65,7 +65,7 @@ export default function LoginScreen(){
             <Form.Control.Feedback type="invalid">Please provide username</Form.Control.Feedback>
           </Col>
         </Form.Group>
-        <Form.Group as={Row} className="justify-content-center" controlId="validate_login">
+        <Form.Group as={Row} className="justify-content-center" controlId="validate_login_password">
           <Col sm="2" md="1">
             <Form.Label>Password</Form.Label>
           </Col>
