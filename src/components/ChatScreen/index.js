@@ -1,5 +1,4 @@
 import React, {useState, useEffect,useContext, useRef} from 'react';
-import io from 'socket.io-client'
 
 import './ChatScreen.css';
 
@@ -15,13 +14,13 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 
 
-const socket = io(`${process.env.REACT_APP_SERVER_URL}`);
 const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3")
 export default function ChatScreen(props){
 
   const Context = useContext(LoginContext);
   const username = Context.username;
 
+  const socket = props.socket;
   const handleLogout = props.handleLogout;
 
   const messagesEndRef = useRef(null);
@@ -38,7 +37,6 @@ export default function ChatScreen(props){
   const closeOnlineUsersModal = () => setShowOnlineUsersModal(false);
   const openOnlineUsersModal = () => setShowOnlineUsersModal(true);
 
-
   useEffect(()=>{
     socket.open();
     socket.emit('login', username);
@@ -49,7 +47,7 @@ export default function ChatScreen(props){
     return () => {
       socket.disconnect();
     }
-  }, [username])
+  }, [username, socket])
 
   useEffect(()=>{
     messagesEndRef.current.scrollIntoView({block: "end"});

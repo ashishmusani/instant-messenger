@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import io from 'socket.io-client';
 
 import ChatScreen from './components/ChatScreen';
 import LoginScreen from './components/LoginScreen';
@@ -10,11 +11,11 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Button from 'react-bootstrap/Button';
 
+const socket = io(`${process.env.REACT_APP_SERVER_URL}`);
 function App() {
 
   const [username, setUsername] = useState( JSON.parse(sessionStorage.getItem('username')) || "");
   const [loggedIn, setLoggedIn] = useState( JSON.parse(sessionStorage.getItem('loggedIn')) || false);
-
 
   const LoginContextValue={
     username,
@@ -43,7 +44,7 @@ function App() {
           </>
         ) : null}
     </Navbar>
-        {loggedIn === true? (<ChatScreen handleLogout={handleLogout}/>) : (<LoginScreen />)}
+        {loggedIn === true? (<ChatScreen handleLogout={handleLogout} socket={socket}/>) : (<LoginScreen />)}
     </LoginContext.Provider>
   );
 }
