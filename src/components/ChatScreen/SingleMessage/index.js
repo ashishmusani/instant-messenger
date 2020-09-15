@@ -10,15 +10,20 @@ export default function SingleMessage(props){
   const envelope = props.envelope;
   const sender = envelope.sender;
   const message = envelope.message;
+  const type = envelope.type;
 
   return(
-    <Row>
+    <div>
       {sender === "Me"? (<Col xs="2"></Col>) : null}
-      <Col xs="10" className={envelope.sender === 'Me'? 'single-message__self' : 'single-message__other'}>
+      <div className={sender === 'Me'? 'single-message__self' : 'single-message__other'}>
         <small><strong>{sender}</strong></small>
-        <div className="single-message__content">{message}</div>
+        <div className="single-message__content">
 
-      </Col>
-    </Row>
+        {type === "image"? (<img className="single-message__image" src={message} />) : message}
+
+        </div>
+
+      </div>
+    </div>
   )
 }
