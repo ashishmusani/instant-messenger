@@ -65,6 +65,9 @@
 #chat-screen__actions__message{
 }
 
+.chat-screen__mediastream{
+  display: none;
+}
 
 @media all and (max-width: 479px) {
     #chat-screen__msg-area__online-users, #chat-screen__msg-area__header__normal{display:none;}

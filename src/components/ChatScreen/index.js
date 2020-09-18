@@ -1,6 +1,10 @@
 import React, {useState, useEffect,useContext, useRef} from 'react';
 import './ChatScreen.css';
 
+//////////
+import Peer from 'peerjs';
+/////////
+
 import SingleMessage from './SingleMessage';
 import OnlineUsersList from './OnlineUsersList';
 
@@ -19,10 +23,15 @@ import { Camera, Telephone } from 'react-bootstrap-icons';
 
 const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
 
-///////////////////////////////////
-var ss = require('socket.io-stream');
-var stream = ss.createStream();
-///////////////////////////////////
+////////////////////
+
+const myPeer = new Peer(undefined,{
+  host: '/',
+  port: 3001,
+  path: '/chat'
+})
+////////////////////
+
 
 export default function ChatScreen(props){
 
@@ -61,7 +70,6 @@ export default function ChatScreen(props){
 
   useEffect(()=>{
     messagesEndRef.current.scrollIntoView({block: "end"});
-    //messageTextboxRef.current.focus();
     updateUnreadOnFocusChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendingTo,conversation]);
@@ -95,9 +103,46 @@ export default function ChatScreen(props){
         alert("Disconnected from server");
         socket.connect();
       }
-    })
+    });
 
   });
+
+  ///////////////////////////////////
+  const videoRef = useRef(null);
+  useEffect(()=>{
+    //videoRef.current.muted = true;
+    navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    }) .then(stream => {
+      //videoRef.current.srcObject = stream;
+      myPeer.on('call', call=>{
+        console.log("call received from another user");
+        call.answer(stream);
+        call.on('stream', userVideoStream =>{
+          videoRef.current.srcObject = userVideoStream;
+          console.log("Stream received from calling to user");
+        })
+      })
+
+
+      socket.on('incoming_call_request', peerId =>{
+        console.log("initiating call to peerId: "+peerId);
+        const call = myPeer.call(peerId,stream);
+        call.on('stream', userVideoStream =>{
+          videoRef.current.srcObject = userVideoStream;
+          console.log("stream received from call initiator user")
+        })
+      })
+
+    })
+
+    return () =>{
+      socket.removeAllListeners('incoming_call');
+      myPeer.destroy();
+    }
+  },[])
+  //////////////////////////////////
 
   function sendMessage(e){
     e.preventDefault();
@@ -123,9 +168,6 @@ export default function ChatScreen(props){
     }
   }
 
-
-
-  /////////////////////////////////////////////
   function sendFile(event){
     var file = event.target.files[0];
     var reader = new FileReader();
@@ -148,17 +190,6 @@ export default function ChatScreen(props){
       updateConversation('outgoing', envelope);
     }
   }
-  /////////////////////////////////////////////
-
-  //////////////////////////////////
-
-  function audio_call(){
-    ss(socket).emit('start_audio_call', stream);
-    stream.write("Hello");
-  }
-
-  //////////////////////////////
-
 
   function updateConversation(type, envelope){
     var channel;
@@ -210,6 +241,13 @@ export default function ChatScreen(props){
     setUnreadMessages(unreadMessages_copy);
   }
 
+  ///////////////////////////////////////
+  function audio_call(){
+    console.log("placing call request");
+    socket.emit('make_call_request', myPeer.id, sendingTo);
+  }
+  //////////////////////////////////////
+
   return (
     <Container fluid id="chat-screen">
         <Row id="chat-screen__msg-area">
@@ -246,13 +284,9 @@ export default function ChatScreen(props){
                             placeholder="Type a message" value={newMessage}
                             onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
                         <InputGroup.Append>
-
                           <Button variant="secondary" onClick={()=> audio_call()}>
                             <Telephone />
                           </Button>
-
-
-
                           <Button variant="secondary" onClick={()=> {sendFileDialogRef.current.click()}}>
                             <Camera />
                           </Button>
@@ -263,8 +297,10 @@ export default function ChatScreen(props){
                     </Form.Group>
                 </Form>
               </div>
+
           </Col>
         </Row>
+        <video className="chat-screen__mediastream" autoplay="true" id="videoElement" ref={videoRef} />
     </Container>
   );
 }
