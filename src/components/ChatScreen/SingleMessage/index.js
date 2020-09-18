@@ -2,7 +2,6 @@ import React from 'react';
 
 import './SingleMessage.css';
 
-import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 export default function SingleMessage(props){
@@ -19,7 +18,7 @@ export default function SingleMessage(props){
         <small><strong>{sender}</strong></small>
         <div className="single-message__content">
 
-        {type === "image"? (<img className="single-message__image" src={message} />) : message}
+        {type === "image"? (<img className="single-message__image" src={message} alt="Problem loading resource"/>) : message}
 
         </div>
 

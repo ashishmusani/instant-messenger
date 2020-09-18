@@ -15,14 +15,9 @@ import Modal from 'react-bootstrap/Modal';
 
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
-import { Camera, Telephone } from 'react-bootstrap-icons';
+import { Camera } from 'react-bootstrap-icons';
 
 const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
-
-///////////////////////////////////
-var ss = require('socket.io-stream');
-var stream = ss.createStream();
-///////////////////////////////////
 
 export default function ChatScreen(props){
 
@@ -61,7 +56,6 @@ export default function ChatScreen(props){
 
   useEffect(()=>{
     messagesEndRef.current.scrollIntoView({block: "end"});
-    //messageTextboxRef.current.focus();
     updateUnreadOnFocusChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendingTo,conversation]);
@@ -123,9 +117,6 @@ export default function ChatScreen(props){
     }
   }
 
-
-
-  /////////////////////////////////////////////
   function sendFile(event){
     var file = event.target.files[0];
     var reader = new FileReader();
@@ -148,17 +139,6 @@ export default function ChatScreen(props){
       updateConversation('outgoing', envelope);
     }
   }
-  /////////////////////////////////////////////
-
-  //////////////////////////////////
-
-  function audio_call(){
-    ss(socket).emit('start_audio_call', stream);
-    stream.write("Hello");
-  }
-
-  //////////////////////////////
-
 
   function updateConversation(type, envelope){
     var channel;
@@ -246,13 +226,6 @@ export default function ChatScreen(props){
                             placeholder="Type a message" value={newMessage}
                             onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
                         <InputGroup.Append>
-
-                          <Button variant="secondary" onClick={()=> audio_call()}>
-                            <Telephone />
-                          </Button>
-
-
-
                           <Button variant="secondary" onClick={()=> {sendFileDialogRef.current.click()}}>
                             <Camera />
                           </Button>
