@@ -12,6 +12,7 @@ import Nav from 'react-bootstrap/Nav';
 import Button from 'react-bootstrap/Button';
 
 const socket = io(`${process.env.REACT_APP_SERVER_URL}`);
+
 function App() {
 
   const [username, setUsername] = useState( JSON.parse(sessionStorage.getItem('username')) || "");

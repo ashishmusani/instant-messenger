@@ -15,9 +15,15 @@ import Modal from 'react-bootstrap/Modal';
 
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
-import { Camera } from 'react-bootstrap-icons';
+import { Camera, Telephone } from 'react-bootstrap-icons';
 
-const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3")
+const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
+
+///////////////////////////////////
+var ss = require('socket.io-stream');
+var stream = ss.createStream();
+///////////////////////////////////
+
 export default function ChatScreen(props){
 
   const Context = useContext(LoginContext);
@@ -133,17 +139,25 @@ export default function ChatScreen(props){
         message: dataURL,
         isBroadcast: sendingTo === 'conference'
       }
-      console.log(envelope)
       if(sendingTo === "conference"){
         socket.emit('broadcast-to-server', envelope);
       } else {
         socket.emit('personal_message', envelope)
       }
+      envelope.sender="Me";
+      updateConversation('outgoing', envelope);
     }
   }
   /////////////////////////////////////////////
 
+  //////////////////////////////////
 
+  function audio_call(){
+    ss(socket).emit('start_audio_call', stream);
+    stream.write("Hello");
+  }
+
+  //////////////////////////////
 
 
   function updateConversation(type, envelope){
@@ -228,10 +242,18 @@ export default function ChatScreen(props){
                 <Form onSubmit={(e)=> sendMessage(e)}>
                     <Form.Group as={Col} sm="12" controlId="send_message">
                       <InputGroup>
-                          <Form.Control id="chat-screen__actions__message" ref={messageTextboxRef} size="md" type="text" placeholder="Type a message and press enter" value={newMessage}
-                          onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
+                          <Form.Control id="chat-screen__actions__message" ref={messageTextboxRef} size="md" type="text"
+                            placeholder="Type a message" value={newMessage}
+                            onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
                         <InputGroup.Append>
-                          <Button onClick={()=> {sendFileDialogRef.current.click()}}>
+
+                          <Button variant="secondary" onClick={()=> audio_call()}>
+                            <Telephone />
+                          </Button>
+
+
+
+                          <Button variant="secondary" onClick={()=> {sendFileDialogRef.current.click()}}>
                             <Camera />
                           </Button>
                           <Form.File id="chat-screen__actions__file" accept="image/*"
