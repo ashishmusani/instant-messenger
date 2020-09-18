@@ -111,37 +111,41 @@ export default function ChatScreen(props){
   const videoRef = useRef(null);
   useEffect(()=>{
     //videoRef.current.muted = true;
-    navigator.mediaDevices.getUserMedia({
-      audio:true,
-      video:false
-    }) .then(stream => {
-      //videoRef.current.srcObject = stream;
       myPeer.on('call', call=>{
         console.log("call received from another user");
-        call.answer(stream);
-        call.on('stream', userVideoStream =>{
-          videoRef.current.srcObject = userVideoStream;
-          console.log("Stream received from calling to user");
-        })
-      })
-
+        navigator.mediaDevices.getUserMedia({
+          audio:true,
+          video:false
+        }).then(stream =>{
+          call.answer(stream);
+          call.on('stream', userVideoStream =>{
+            videoRef.current.srcObject = userVideoStream;
+            console.log("Stream received from calling to user");
+          })
+        });
+      });
 
       socket.on('incoming_call_request', peerId =>{
         console.log("initiating call to peerId: "+peerId);
-        const call = myPeer.call(peerId,stream);
-        call.on('stream', userVideoStream =>{
-          videoRef.current.srcObject = userVideoStream;
-          console.log("stream received from call initiator user")
-        })
-      })
+        navigator.mediaDevices.getUserMedia({
+          audio:true,
+          video:false
+        }).then(stream =>{
+          const call = myPeer.call(peerId,stream);
+          call.on('stream', userVideoStream =>{
+            videoRef.current.srcObject = userVideoStream;
+            console.log("stream received from call initiator user")
+          })
+        });
+      });
 
-    })
+      return () =>{
+        socket.removeAllListeners('incoming_call');
+        myPeer.destroy();
+      }
 
-    return () =>{
-      socket.removeAllListeners('incoming_call');
-      myPeer.destroy();
-    }
-  },[])
+    },[]);
+
   //////////////////////////////////
 
   function sendMessage(e){
