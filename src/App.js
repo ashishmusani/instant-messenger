@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useReducer} from 'react';
 import io from 'socket.io-client';
 
 import ChatScreen from './components/ChatScreen';
@@ -12,31 +12,45 @@ import Nav from 'react-bootstrap/Nav';
 import Button from 'react-bootstrap/Button';
 
 const socket = io(`${process.env.REACT_APP_SERVER_URL}`);
+
+function loginReducer(state, action){
+  switch (action.type) {
+    case 'login':
+      return {loggedIn: true, username: action.username};
+    case 'logout':
+      return {loggedIn: false, username: null};
+    default:
+      throw new Error();
+  }
+}
+
 function App() {
 
-  const [username, setUsername] = useState( JSON.parse(sessionStorage.getItem('username')) || "");
-  const [loggedIn, setLoggedIn] = useState( JSON.parse(sessionStorage.getItem('loggedIn')) || false);
-
-  const LoginContextValue={
-    username,
-    loggedIn,
-    setUsername,
-    setLoggedIn
-  }
+  const [loginDetails, dispatch] = useReducer(loginReducer,{
+    username: (JSON.parse(sessionStorage.getItem('username')) || ""),
+    loggedIn: (JSON.parse(sessionStorage.getItem('loggedIn')) || false)
+  })
 
   const handleLogout = () =>{
-    setUsername("");
-    setLoggedIn(false);
-    sessionStorage.removeItem('username');
-    sessionStorage.removeItem('loggedIn');
+    sessionStorage.setItem('username', JSON.stringify(null));
+    sessionStorage.setItem('loggedIn', JSON.stringify(false));
+    if(socket.connected){
+      socket.close();
+    }
+    dispatch({type: 'logout'});
+
   }
 
+  const LoginContextValue={
+    ...loginDetails,
+    dispatch
+  }
 
   return (
     <LoginContext.Provider value={LoginContextValue}>
     <Navbar className="header" expand="lg" sticky="top">
       <Navbar.Brand>Instant Messenger</Navbar.Brand>
-        {loggedIn === true? (
+        {loginDetails.loggedIn === true? (
           <>
           <Nav className="ml-auto">
             <Button variant="outline-secondary" size="sm" onClick={handleLogout}>Logout</Button>
@@ -44,7 +58,7 @@ function App() {
           </>
         ) : null}
     </Navbar>
-        {loggedIn === true? (<ChatScreen handleLogout={handleLogout} socket={socket}/>) : (<LoginScreen />)}
+        {loginDetails.loggedIn === true? (<ChatScreen handleLogout={handleLogout} socket={socket}/>) : (<LoginScreen />)}
     </LoginContext.Provider>
   );
 }

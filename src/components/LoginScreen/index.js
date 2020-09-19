@@ -34,8 +34,7 @@ export default function LoginScreen(){
         if(res.status === 201){
           sessionStorage.setItem('username', JSON.stringify(username));
           sessionStorage.setItem('loggedIn', JSON.stringify(true));
-          Context.setUsername(username);
-          Context.setLoggedIn(true)
+          Context.dispatch({type: 'login', username})
         }
       })
       .catch(err =>{
