@@ -59,7 +59,7 @@ export default function LoginScreen(){
           <Col sm="4" md="4">
             <Form.Control type="text" size="sm" value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          required autocomplete="off">
+                          required autocomplete="off" autoFocus>
             </Form.Control>
             <Form.Control.Feedback type="invalid">Please provide username</Form.Control.Feedback>
           </Col>

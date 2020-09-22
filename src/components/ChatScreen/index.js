@@ -1,5 +1,4 @@
 import React, {useState, useEffect,useContext, useRef} from 'react';
-
 import './ChatScreen.css';
 
 import SingleMessage from './SingleMessage';
@@ -14,7 +13,12 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 
 
-const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3")
+import InputGroup from 'react-bootstrap/InputGroup';
+import Button from 'react-bootstrap/Button';
+import { Camera } from 'react-bootstrap-icons';
+
+const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
+
 export default function ChatScreen(props){
 
   const Context = useContext(LoginContext);
@@ -25,6 +29,7 @@ export default function ChatScreen(props){
 
   const messagesEndRef = useRef(null);
   const messageTextboxRef = useRef(null);
+  const sendFileDialogRef = useRef(null);
 
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [conversation, setConversation] = useState({});
@@ -51,7 +56,6 @@ export default function ChatScreen(props){
 
   useEffect(()=>{
     messagesEndRef.current.scrollIntoView({block: "end"});
-    //messageTextboxRef.current.focus();
     updateUnreadOnFocusChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sendingTo,conversation]);
@@ -67,11 +71,9 @@ export default function ChatScreen(props){
     socket.removeAllListeners('disconnect');
 
     socket.on('broadcast-to-clients', (envelope)=>{
-      console.log('message from server')
       NotificationSound.play();
       updateUnreadOnMessageReceive(envelope);
       updateConversation('incoming', envelope);
-      console.log(unreadMessagesCount);
     })
     socket.on('online-users-list', (userList)=>{
       setOnlineUsers(userList.filter(uname => (uname !== username)));
@@ -88,6 +90,7 @@ export default function ChatScreen(props){
         socket.connect();
       }
     })
+
   });
 
   function sendMessage(e){
@@ -99,6 +102,7 @@ export default function ChatScreen(props){
       const envelope = {
         sender: username,
         to: sendingTo,
+        type:"text" ,
         message: newMessage,
         isBroadcast: sendingTo === 'conference'
       }
@@ -110,6 +114,29 @@ export default function ChatScreen(props){
       envelope.sender="Me";
       updateConversation('outgoing', envelope);
       setNewMessage("");
+    }
+  }
+
+  function sendFile(event){
+    var file = event.target.files[0];
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      var dataURL = reader.result;
+      const envelope = {
+        sender: username,
+        to: sendingTo,
+        type:"image" ,
+        message: dataURL,
+        isBroadcast: sendingTo === 'conference'
+      }
+      if(sendingTo === "conference"){
+        socket.emit('broadcast-to-server', envelope);
+      } else {
+        socket.emit('personal_message', envelope)
+      }
+      envelope.sender="Me";
+      updateConversation('outgoing', envelope);
     }
   }
 
@@ -194,8 +221,18 @@ export default function ChatScreen(props){
               <div className="chat-screen__actions">
                 <Form onSubmit={(e)=> sendMessage(e)}>
                     <Form.Group as={Col} sm="12" controlId="send_message">
-                          <Form.Control id="chat-screen__actions__message" ref={messageTextboxRef} size="md" type="text" placeholder="Type a message and press enter" value={newMessage}
-                          onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
+                      <InputGroup>
+                          <Form.Control id="chat-screen__actions__message" ref={messageTextboxRef} size="md" type="text"
+                            placeholder="Type a message" value={newMessage}
+                            onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
+                        <InputGroup.Append>
+                          <Button variant="secondary" onClick={()=> {sendFileDialogRef.current.click()}}>
+                            <Camera />
+                          </Button>
+                          <Form.File id="chat-screen__actions__file" accept="image/*"
+                          ref={sendFileDialogRef} onChange={(e)=> sendFile(e)}/>
+                        </InputGroup.Append>
+                      </InputGroup>
                     </Form.Group>
                 </Form>
               </div>

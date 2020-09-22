@@ -1,11 +1,21 @@
 .single-message__self{
+  width: min-content;
+  max-width: 80%;
+  padding-right: 15px;
+  padding-left: 15px;
   padding-top: 1px;
   padding-bottom: 1px;
+  margin-right: 0px;
+  margin-left: auto;
   margin-bottom: 10px;
   background-color: #DCF8C6;
   border-radius: 5px;
 }
 .single-message__other{
+  max-width: 80%;
+  width: min-content;
+  padding-right: 15px;
+  padding-left: 15px;
   padding-top: 1px;
   padding-bottom: 1px;
   margin-bottom: 10px;
@@ -15,4 +25,10 @@
 
 .single-message__content{
   word-wrap: break-word;
+}
+
+.single-message__image{
+  height: auto;
+  width: 200px;
+  padding-bottom: 15px;
 }

@@ -58,9 +58,13 @@
   padding: 10px;
 }
 
-#chat-screen__actions__message{
-  border-radius: 50px
+#chat-screen__actions__file{
+  display: none;
 }
+
+#chat-screen__actions__message{
+}
+
 
 @media all and (max-width: 479px) {
     #chat-screen__msg-area__online-users, #chat-screen__msg-area__header__normal{display:none;}
