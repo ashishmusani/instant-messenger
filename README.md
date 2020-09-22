@@ -1,3 +1,5 @@
+Instant messenger web app build using ReactJS. Supports text messaging and image sharing. Includes broadcasting facility to online users as well as personal messaging features. This repo contains frontend code. Backend code available [here](https://github.com/ashishmusani/instant-messenger-server).
+
 ## [Instant Messenger Live Demo](https://instant-messenger-95c70.web.app/)
 
 ## Use logins
@@ -5,7 +7,6 @@
 * Username: user1, password: user1
 * Username: user2, password: user2
 
-Instant messenger web app build using ReactJS. Supports text messaging and image sharing. Includes broadcasting facility to online users as well as personal messaging features.
 
 ## Libraries Used
 * bootstrap
