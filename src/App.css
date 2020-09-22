@@ -1,7 +1,20 @@
 *{
   overflow: hidden;;
+  scrollbar-width: thin;
+  scrollbar-color: blue orange;
 }
 
 .header{
   background-color: #EDEDED;
+}
+
+/* Works on Chrome/Edge/Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: hsla(0,0%,100%,.1);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.2);
 }

@@ -1,5 +1,5 @@
 .single-message__self{
-  width: min-content;
+  width: max-content;
   max-width: 80%;
   padding-right: 15px;
   padding-left: 15px;
@@ -13,7 +13,7 @@
 }
 .single-message__other{
   max-width: 80%;
-  width: min-content;
+  width: max-content;
   padding-right: 15px;
   padding-left: 15px;
   padding-top: 1px;
