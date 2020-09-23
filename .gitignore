@@ -23,5 +23,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-deleted code
-/realtime-chat-server
+
+# firebase
+.firebase/
+.firebaserc
+firebase.json

@@ -209,7 +209,7 @@ export default function ChatScreen(props){
       console.log("ending audio call");
       socket.emit('end_ongoing_call', isInCallWith);
       if(callType === 'outgoing'){
-        peer_call.close();
+        peer_call && peer_call.close();
       }
       else{
         // myPeer.destroy();
