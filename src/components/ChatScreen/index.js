@@ -26,11 +26,11 @@ const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3")
 ////////////////////
 
 const myPeer = new Peer(undefined,{
-  host: '/',
-  port: 3001,
-  path: '/chat'
+  secure: true
 })
 ////////////////////
+
+console.log(myPeer)
 
 var peer_call;
 var local_stream;
