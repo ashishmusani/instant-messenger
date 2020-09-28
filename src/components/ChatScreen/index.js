@@ -1,9 +1,9 @@
-import React, {useState, useEffect,useContext, useRef} from 'react';
-import './ChatScreen.css';
+import React, {useState, useEffect,useContext, useRef, useReducer} from 'react';
+import Peer from 'peerjs';
 
+import './ChatScreen.css';
 import SingleMessage from './SingleMessage';
 import OnlineUsersList from './OnlineUsersList';
-
 import LoginContext from '../../contexts/LoginContext';
 
 import Container from 'react-bootstrap/Container';
@@ -11,13 +11,60 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
-
-
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
-import { Camera } from 'react-bootstrap-icons';
+import { Camera, Telephone, TelephoneInbound,TelephoneX } from 'react-bootstrap-icons';
 
 const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
+
+const myPeer = new Peer(undefined,{
+  secure: true
+})
+var peer_call;
+var local_stream;
+
+
+const initialCallState = {
+  isInCall: false,
+  callType: null,
+  callStatus: null,
+  isInCallWith: null,
+  peerIdToCall: null
+}
+
+function callStateReducer(state, action){
+  switch (action.type) {
+    case 'outgoing-call':
+      return {
+        isInCall: true,
+        callType: 'outgoing',
+        callStatus: 'ringing',
+        isInCallWith: action.calling_to,
+      };
+    case 'outgoing-call__answered':
+      return {...state, callStatus:'connected'};
+    case 'outgoing-call__declined':
+      return {};
+    case 'outgoing-call__ended':
+      return {...initialCallState};
+    case 'incoming-call':
+      return {
+        isInCall: true,
+        callType: 'incoming',
+        callStatus: 'ringing',
+        isInCallWith: action.call_from,
+        peerIdToCall: action.callee_peerId
+      };
+    case 'incoming-call__answered':
+      return {...state, callStatus:'connected'};
+    case 'incoming-call__declined':
+      return {};
+    case 'incoming-call__ended':
+      return {};
+    default:
+      throw new Error();
+  }
+}
 
 export default function ChatScreen(props){
 
@@ -30,17 +77,19 @@ export default function ChatScreen(props){
   const messagesEndRef = useRef(null);
   const messageTextboxRef = useRef(null);
   const sendFileDialogRef = useRef(null);
+  const mediaDivRef = useRef(null);
+
 
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [conversation, setConversation] = useState({});
   const [unreadMessagesCount, setUnreadMessages] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [sendingTo, setSendingTo] = useState("conference");
-
-
   const [showOnlineUsersModal, setShowOnlineUsersModal] = useState(false);
   const closeOnlineUsersModal = () => setShowOnlineUsersModal(false);
   const openOnlineUsersModal = () => setShowOnlineUsersModal(true);
+
+  const [callState, dispatch] = useReducer(callStateReducer, initialCallState)
 
   useEffect(()=>{
     socket.open();
@@ -89,6 +138,12 @@ export default function ChatScreen(props){
         alert("Disconnected from server");
         socket.connect();
       }
+    })
+
+    socket.removeAllListeners('incoming_call_request');
+    socket.on('incoming_call_request', (peerId, from_user) => {
+      console.log("initiating call to peerId: "+peerId);
+      dispatch({type: 'incoming-call', call_from: from_user, callee_peerId: peerId});
     })
 
   });
@@ -190,6 +245,69 @@ export default function ChatScreen(props){
     setUnreadMessages(unreadMessages_copy);
   }
 
+  function initiate_audio_call(){
+    if(sendingTo === 'conference'){
+      alert('Oops! Conference calls are not yet supported!')
+    }
+    else{
+      console.log('Placing audio call request');
+      socket.emit('make_call_request', myPeer.id, sendingTo, username);
+      dispatch({type: 'outgoing-call', calling_to: sendingTo});
+
+      myPeer.on('call', call=>{
+        console.log("call received from another user");
+        dispatch({type: 'outgoing-call__answered'});
+        navigator.mediaDevices.getUserMedia({
+          audio:true,
+          video:false
+        }).then(stream =>{
+          local_stream = stream;
+          peer_call=call;
+          call.answer(stream);
+          call.on('stream', userVideoStream =>{
+            mediaDivRef.current.srcObject = userVideoStream;
+            console.log("Stream received from calling to user");
+          })
+          peer_call.on('close', () =>{
+            endCall();
+          })
+        });
+      });
+
+    }
+  }
+
+  function answerIncomingCall(){
+    dispatch({type: 'incoming-call__answered'});
+    navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    }).then(stream => {
+      local_stream = stream;
+      peer_call = myPeer.call(callState.peerIdToCall,stream);
+      peer_call.on('stream', userVideoStream =>{
+        mediaDivRef.current.srcObject = userVideoStream;
+        console.log("stream received from call initiator user")
+      })
+    })
+  }
+
+  function endCall(){
+    console.log("ending audio call");
+    socket.emit('end_ongoing_call', callState.isInCallWith);
+    if(callState.callType === 'outgoing'){
+      peer_call && peer_call.close();
+    }
+    clearEndedCallDetails()
+  }
+
+  function clearEndedCallDetails(){
+    if(local_stream){
+      local_stream.getTracks().forEach(track => track.stop())
+    }
+    dispatch({type: 'outgoing-call__ended'})
+  }
+
   return (
     <Container fluid id="chat-screen">
         <Row id="chat-screen__msg-area">
@@ -226,6 +344,9 @@ export default function ChatScreen(props){
                             placeholder="Type a message" value={newMessage}
                             onChange={(e)=> setNewMessage(e.target.value)} autocomplete="off" autoFocus/>
                         <InputGroup.Append>
+                          <Button variant="secondary" onClick={()=> initiate_audio_call()}>
+                            <Telephone />
+                          </Button>
                           <Button variant="secondary" onClick={()=> {sendFileDialogRef.current.click()}}>
                             <Camera />
                           </Button>
@@ -238,6 +359,29 @@ export default function ChatScreen(props){
               </div>
           </Col>
         </Row>
+
+
+
+        <video className="chat-screen__mediastream" autoplay="true" id="mediaDiv" ref={mediaDivRef} />
+        <Modal id="call_modal" show={callState.isInCall} centered>
+                <div className ="call_profile">
+                  <div className="call_profile_photo"></div>
+                  <div className="call_profile_name">{callState.isInCallWith}</div>
+                </div>
+                <div className ="call_actions">
+                {(callState.callType === 'incoming' && callState.callStatus === 'ringing') ?
+                ( <>
+                    <TelephoneInbound id="call_answer_button" onClick={()=> answerIncomingCall()}/>
+                    <TelephoneX id="call_end_button" onClick={()=> endCall()}/>
+                  </>
+                ) :
+                (<TelephoneX id="call_end_button" onClick={()=> endCall()}/>)}
+                </div>
+        </Modal>
+
+
+
+
     </Container>
   );
 }

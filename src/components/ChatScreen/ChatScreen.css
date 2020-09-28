@@ -73,3 +73,43 @@
 @media all and (min-width: 480px) {
     #chat-screen__msg-area__header__xs{display:none;}
 }
+
+.chat-screen__mediastream{
+  display: none;
+}
+
+#call_modal{
+  width: 250px;
+}
+.call_profile{
+  flex-grow: auto;
+  height: 300px;
+  width: 250px;
+}
+.call_profile_photo{
+  height: 250px;
+  width: 250px;
+  background-color: grey;
+}
+.call_profile_name{
+  text-align: center;
+  font-size: 1.5rem;
+}
+#call_answer_button{
+  width: 50%;
+  padding: 40px;
+  height: auto;
+  background-color: blue;
+}
+#call_answer_button:hover{
+  cursor:pointer;
+}
+#call_end_button{
+  width: 50%;
+  padding: 40px;
+  height: auto;
+  background-color: red;
+}
+#call_end_button:hover{
+  cursor:pointer;
+}
