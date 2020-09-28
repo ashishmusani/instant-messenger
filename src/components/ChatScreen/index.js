@@ -15,13 +15,21 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import { Camera, Telephone, TelephoneInbound,TelephoneX } from 'react-bootstrap-icons';
 
-const NotificationSound = new Audio(process.env.PUBLIC_URL+ "/notification.mp3");
+const MessageNotificationSound = new Audio(process.env.PUBLIC_URL+ "/msg_notification.mp3");
+const IncomingCallNotificationSound = new Audio(process.env.PUBLIC_URL+ "/call_notification.mp3");
+const CallDropNotificationSound = new Audio(process.env.PUBLIC_URL+ "/call_drop_notification.mp3");
+const OutgoingCallRingSound = new Audio(process.env.PUBLIC_URL+ "/ringing_tone.mp3");
+
+IncomingCallNotificationSound.loop = true;
+OutgoingCallRingSound.loop = true;
+
 
 const myPeer = new Peer(undefined,{
   secure: true
 })
 var peer_call;
 var local_stream;
+var callRingingInterval;
 
 
 const initialCallState = {
@@ -118,7 +126,7 @@ export default function ChatScreen(props){
     socket.removeAllListeners('disconnect');
 
     socket.on('broadcast-to-clients', (envelope)=>{
-      NotificationSound.play();
+      MessageNotificationSound.play();
       updateUnreadOnMessageReceive(envelope);
       updateConversation('incoming', envelope);
     })
@@ -126,7 +134,7 @@ export default function ChatScreen(props){
       setOnlineUsers(userList.filter(uname => (uname !== username)));
     })
     socket.on('personal_message', (envelope)=>{
-      NotificationSound.play();
+      MessageNotificationSound.play();
       updateUnreadOnMessageReceive(envelope);
       updateConversation('incoming', envelope);
     })
@@ -141,6 +149,7 @@ export default function ChatScreen(props){
     socket.removeAllListeners('incoming_call_request');
     socket.on('incoming_call_request', (peerId, from_user) => {
       console.log("initiating call to peerId: "+peerId);
+      IncomingCallNotificationSound.play();
       dispatch({type: 'incoming-call', call_from: from_user, callee_peerId: peerId});
     })
 
@@ -255,11 +264,13 @@ export default function ChatScreen(props){
     }
     else{
       console.log('Placing audio call request');
+      OutgoingCallRingSound.play();
       socket.emit('make_call_request', myPeer.id, sendingTo, username);
       dispatch({type: 'outgoing-call', calling_to: sendingTo});
 
       myPeer.on('call', call=>{
         console.log("call received from another user");
+        resetNotificationSounds();
         dispatch({type: 'outgoing-call__answered'});
         navigator.mediaDevices.getUserMedia({
           audio:true,
@@ -283,6 +294,7 @@ export default function ChatScreen(props){
   }
 
   function answerIncomingCall(){
+    resetNotificationSounds();
     dispatch({type: 'incoming-call__answered'});
     navigator.mediaDevices.getUserMedia({
       audio:true,
@@ -302,6 +314,8 @@ export default function ChatScreen(props){
   }
 
   function endCall(fromSelf){
+    resetNotificationSounds();
+    CallDropNotificationSound.play();
     console.log("ending "+ callState.callType  + " call");
     myPeer.removeAllListeners();
     if(fromSelf){
@@ -323,6 +337,13 @@ export default function ChatScreen(props){
       local_stream.getTracks().forEach(track => track.stop())
     }
     dispatch({type: 'call__ended'})
+  }
+
+  function resetNotificationSounds(){
+    IncomingCallNotificationSound.pause();
+    IncomingCallNotificationSound.currentTime = 0;
+    OutgoingCallRingSound.pause();
+    OutgoingCallRingSound.currentTime = 0;
   }
 
   return (
