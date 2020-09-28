@@ -45,8 +45,6 @@ function callStateReducer(state, action){
       return {...state, callStatus:'connected'};
     case 'outgoing-call__declined':
       return {};
-    case 'outgoing-call__ended':
-      return {...initialCallState};
     case 'incoming-call':
       return {
         isInCall: true,
@@ -59,9 +57,9 @@ function callStateReducer(state, action){
       return {...state, callStatus:'connected'};
     case 'incoming-call__declined':
       return {};
-    case 'incoming-call__ended':
-      return {};
-    default:
+    case 'call__ended':
+      return {...initialCallState};
+      default:
       throw new Error();
   }
 }
@@ -144,6 +142,12 @@ export default function ChatScreen(props){
     socket.on('incoming_call_request', (peerId, from_user) => {
       console.log("initiating call to peerId: "+peerId);
       dispatch({type: 'incoming-call', call_from: from_user, callee_peerId: peerId});
+    })
+
+    socket.removeAllListeners('end_ongoing_call');
+    socket.on('end_ongoing_call', () => {
+      console.log("ending call due to socket event receipt");
+      endCall();
     })
 
   });
@@ -269,7 +273,8 @@ export default function ChatScreen(props){
             console.log("Stream received from calling to user");
           })
           peer_call.on('close', () =>{
-            endCall();
+            console.log("on close() called for " + callState.callType);
+            clearEndedCallDetails();
           })
         });
       });
@@ -289,23 +294,35 @@ export default function ChatScreen(props){
         mediaDivRef.current.srcObject = userVideoStream;
         console.log("stream received from call initiator user")
       })
+      peer_call.on('close', ()=>{
+        console.log("on close() called for " + callState.callType);
+        clearEndedCallDetails()
+      })
     })
   }
 
-  function endCall(){
-    console.log("ending audio call");
-    socket.emit('end_ongoing_call', callState.isInCallWith);
-    if(callState.callType === 'outgoing'){
-      peer_call && peer_call.close();
+  function endCall(fromSelf){
+    console.log("ending "+ callState.callType  + " call");
+    myPeer.removeAllListeners();
+    if(fromSelf){
+      socket.emit('end_ongoing_call', callState.isInCallWith);
     }
-    clearEndedCallDetails()
+    switch (callState.callStatus){
+      case 'connected':
+        peer_call.close();
+        break;
+      case 'ringing':
+        clearEndedCallDetails();
+        break;
+    }
   }
 
   function clearEndedCallDetails(){
+    mediaDivRef.current.srcObject = null;
     if(local_stream){
       local_stream.getTracks().forEach(track => track.stop())
     }
-    dispatch({type: 'outgoing-call__ended'})
+    dispatch({type: 'call__ended'})
   }
 
   return (
@@ -372,10 +389,10 @@ export default function ChatScreen(props){
                 {(callState.callType === 'incoming' && callState.callStatus === 'ringing') ?
                 ( <>
                     <TelephoneInbound id="call_answer_button" onClick={()=> answerIncomingCall()}/>
-                    <TelephoneX id="call_end_button" onClick={()=> endCall()}/>
+                    <TelephoneX id="call_end_button" onClick={()=> endCall(true)}/>
                   </>
                 ) :
-                (<TelephoneX id="call_end_button" onClick={()=> endCall()}/>)}
+                (<TelephoneX id="call_end_button" onClick={()=> endCall(true)}/>)}
                 </div>
         </Modal>
 
