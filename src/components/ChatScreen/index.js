@@ -161,6 +161,16 @@ export default function ChatScreen(props){
 
   });
 
+  useEffect(()=>{
+    if(callState.callType === 'outgoing' && callState.callStatus === 'ringing'){
+      setTimeout(()=>{
+        console.log("Outgoing call timeout");
+        endCall(true)
+      },5000)
+    }
+  }, [callState])
+
+
   function sendMessage(e){
     e.preventDefault();
     if(newMessage === ""){
