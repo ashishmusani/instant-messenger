@@ -25,7 +25,9 @@ OutgoingCallRingSound.loop = true;
 
 
 const myPeer = new Peer(undefined,{
-  secure: true
+  host: '/',
+  port: 9999,
+  //secure: true
 })
 var peer_call;
 var local_stream;
@@ -365,6 +367,36 @@ export default function ChatScreen(props){
 
   return (
     <Container fluid id="chat-screen">
+      
+      {callState.isInCall? (
+        <div className="chat-screen_call_ui">
+          <div className="chat-screen_call_ui__icon">
+          </div>
+          <div className="chat-screen_call_ui__details">
+          <strong>{callState.isInCallWith}</strong>
+          </div>
+          <div className="chat-screen_call_ui_actions">
+            {(callState.callType === 'incoming' && callState.callStatus === 'ringing') ?
+              ( <span className="call_answer_button" onClick={()=> answerIncomingCall()}>
+                  <TelephoneInbound />  
+                </span>
+              ) : null
+            }
+              <span className="call_end_button" onClick={()=> endCall(true)}>
+                <TelephoneX />
+              </span>
+          </div>
+        </div>
+
+      ) : null
+      }
+
+
+
+
+
+
+
         <Row id="chat-screen__msg-area">
           <Col xs="3" sm="3" id="chat-screen__msg-area__online-users">
             <OnlineUsersList onlineUsers={onlineUsers} unreadMessagesCount={unreadMessagesCount}
@@ -416,29 +448,7 @@ export default function ChatScreen(props){
               </div>
           </Col>
         </Row>
-
-
-
         <video className="chat-screen__mediastream" autoplay="true" id="mediaDiv" ref={mediaDivRef} />
-        <Modal id="call_modal" show={callState.isInCall} centered>
-                <div className ="call_profile">
-                  <div className="call_profile_photo"></div>
-                  <div className="call_profile_name">{callState.isInCallWith}</div>
-                </div>
-                <div className ="call_actions">
-                {(callState.callType === 'incoming' && callState.callStatus === 'ringing') ?
-                ( <>
-                    <TelephoneInbound id="call_answer_button" onClick={()=> answerIncomingCall()}/>
-                    <TelephoneX id="call_end_button" onClick={()=> endCall(true)}/>
-                  </>
-                ) :
-                (<TelephoneX id="call_end_button" onClick={()=> endCall(true)}/>)}
-                </div>
-        </Modal>
-
-
-
-
     </Container>
   );
 }

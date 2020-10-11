@@ -95,21 +95,59 @@
   text-align: center;
   font-size: 1.5rem;
 }
-#call_answer_button{
-  width: 50%;
-  padding: 40px;
-  height: auto;
+
+.chat-screen_call_ui{
+  display: flex;
+  z-index: 101;
+  left: 50%;
+  position: absolute;
+  height: 60px;
+  min-width: 300px;
+  padding: 5px;
+  background-color: #EDEDED;
+}
+.chat-screen_call_ui__icon{
+  flex-grow: auto;
+  background-image: url('/profile_default.png');
+  height: 50px;
+  width: 17%;
+  background-color: #F5F5F5;
+  padding: 5px;
+  border-radius: 50px;
+}
+.chat-screen_call_ui__details{
+  padding: 15px 5px;
+  width: 49%;
+}
+
+.chat-screen_call_ui_actions{
+  display: flex;
+  float: right;
+  align-items: center;
+  justify-content: flex-end;
+  height: 50px;
+  width: 34%;
+}
+.call_answer_button{
+  width: 40px;
+  padding: 10px;
+  height: 40px;
   background-color: blue;
+  border-radius: 20px;
+  margin-right: 5px;
 }
-#call_answer_button:hover{
+.call_answer_button:hover{
   cursor:pointer;
+  background-color: white;
 }
-#call_end_button{
-  width: 50%;
-  padding: 40px;
-  height: auto;
+.call_end_button{
+  width: 40px;
+  padding: 10px;
+  height: 40px;
   background-color: red;
+  border-radius: 20px;
 }
-#call_end_button:hover{
+.call_end_button:hover{
   cursor:pointer;
+  background-color: white;
 }
