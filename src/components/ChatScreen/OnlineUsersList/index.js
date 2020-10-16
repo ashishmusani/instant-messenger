@@ -1,6 +1,7 @@
 import React from 'react';
 
 import UserView from './UserView';
+import './OnlineUsersList.css';
 
 export default function OnlineUsersList(props){
   const sendingTo = props.sendingTo;

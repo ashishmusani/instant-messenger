@@ -17,10 +17,10 @@
 }
 
 #chat-screen__msg-area__online-users{
+  height: 100%;
   margin: 0px;
   padding: 0px;
   border: 1px solid #F7F7F7;
-  overflow: auto;
 }
 
 #chat-screen__msg-area__main{
@@ -42,6 +42,10 @@
   text-align: center;
   background-color: #91908f;
   border-top: 1px solid #F5F5F5;
+}
+
+#chat-screen__mobile-device__user-list{
+  height: 50vh;
 }
 
 .chat-screen__msg-area__conversation{

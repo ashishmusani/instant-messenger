@@ -31,7 +31,7 @@ export default function LoginScreen(){
       }
       axios.post(`${process.env.REACT_APP_SERVER_URL}/login`, userCredentials)
       .then(res =>{
-        if(res.status === 201){
+        if(res.status === 200){
           sessionStorage.setItem('username', JSON.stringify(username));
           sessionStorage.setItem('loggedIn', JSON.stringify(true));
           Context.dispatch({type: 'login', username})
@@ -39,11 +39,11 @@ export default function LoginScreen(){
       })
       .catch(err =>{
         if(err){
-          if(err.response && err.response.status === 401){
+          if(err.response && (err.response.status === 401 || err.response.status === 403)){
             alert(err.response.data)
           }
           else{
-            alert(err);
+            alert("Something went wrong. Please try later");
           }
         }
       })

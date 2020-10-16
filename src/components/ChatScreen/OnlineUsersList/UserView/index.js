@@ -9,12 +9,29 @@ export default function UserView(props){
   const unreads = props.unreads;
   const closeOnlineUsersModal =  props.closeOnlineUsersModal;
 
-  let lastSeenAt;
+  const formatTime = (date) => {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let ampm = hours>12 ? 'PM' : 'AM';
+    hours %= 12;
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    let strTime=`${hours}:${minutes} ${ampm}`;
+    return strTime;
+  }
+
+  let lastSeenString;
   if(user.lastSeen && !user.isOnline){
+    lastSeenString = "last seen"
     let lastSeenDate = new Date(user.lastSeen)
-    let currentDate = new Date()
-    let timeDiff = currentDate - lastSeenDate;
-    lastSeenAt = `${lastSeenDate.getDate()}/${lastSeenDate.getMonth()+1} ${lastSeenDate.getHours()}:${lastSeenDate.getMinutes()}`;
+    let timeDiffInSecs = (new Date() - lastSeenDate)/1000;
+    if(timeDiffInSecs <= 24*60*60){
+      lastSeenString += " today at "
+    } else if (timeDiffInSecs <= 2*24*60*60) {
+      lastSeenString += " yesterday at "
+    } else {
+      lastSeenString += ` on ${lastSeenDate.getDate()}/${lastSeenDate.getMonth()+1} at `
+    }
+    lastSeenString += formatTime(lastSeenDate);
   }
 
   const changeConversationWindow = () =>{
@@ -32,7 +49,7 @@ export default function UserView(props){
       {user.username !== "conference"? 
             ((user.isOnline)? 
                 "Online" : 
-                (user.lastSeen? `Last seen ${lastSeenAt}` : "Offline")
+                (user.lastSeen? lastSeenString : "Offline")
             ) : 
             null}
       </div>

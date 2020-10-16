@@ -1,3 +1,5 @@
 .online-users-list{
-  overflow-y: scroll;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
