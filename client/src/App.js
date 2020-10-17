@@ -11,7 +11,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Button from 'react-bootstrap/Button';
 
-const socket = io(`${process.env.REACT_APP_SERVER_URL}`);
+const socket = io({secure: true});
 
 function loginReducer(state, action){
   switch (action.type) {

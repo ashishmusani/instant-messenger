@@ -29,7 +29,7 @@ export default function LoginScreen(){
         "username": username,
         "password": password
       }
-      axios.post(`${process.env.REACT_APP_SERVER_URL}/login`, userCredentials)
+      axios.post(`${window.location.href}login`, userCredentials)
       .then(res =>{
         if(res.status === 200){
           sessionStorage.setItem('username', JSON.stringify(username));

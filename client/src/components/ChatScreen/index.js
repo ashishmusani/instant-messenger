@@ -26,9 +26,7 @@ OutgoingCallRingSound.loop = true;
 
 
 const myPeer = new Peer(undefined,{
-  host: '/',
-  port: 9999,
-  //secure: true
+  secure: true
 })
 var peer_call;
 var local_stream;
