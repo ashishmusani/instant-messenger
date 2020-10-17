@@ -11,8 +11,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, './client/build')));
 
-const dbConnectionUrl = `mongodb+srv://im_admin:HAkqPt8yOHjQn6GI@cluster0.dgglj.mongodb.net/instant_messenger?retryWrites=true&w=majority`
-mongoose.connect(dbConnectionUrl, {'useNewUrlParser': true, useUnifiedTopology: true } );
+mongoose.connect(process.env.DB_URI, {'useNewUrlParser': true, useUnifiedTopology: true } );
 const User = require('./models/userModel');
 
 io.on('connect',socket=>{
